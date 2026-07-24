@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FNCL Group Manulife Investment Report Generator</title>
+    <meta name="description" content="Extract financial metrics from Manulife PDF statements and seamlessly inject them into your custom pre-formatted Excel template preserving styles.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="tailwind.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#0B0F19',
+                            card: '#161F32',
+                            teal: '#00D1FF',
+                            green: '#10B981',
+                            blue: '#3B82F6',
+                            grey: '#9CA3AF'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-brand-dark text-slate-100 font-sans min-h-full flex flex-col justify-between overflow-x-hidden relative">
+
+    <!-- Local File Protocol Warning Banner -->
+    <div id="protocol-warning" class="hidden bg-red-950/80 border-b border-red-500/50 text-red-200 py-3.5 px-4 text-center text-sm font-semibold relative z-50">
+        ⚠️ Warning: You opened this page directly from your file explorer. The application will NOT work. Please close this window, double-click <code class="bg-red-900/40 px-1.5 py-0.5 rounded font-mono text-xs">run.bat</code>, and use <a href="http://127.0.0.1:8080" class="underline hover:text-white">http://127.0.0.1:8080</a> instead.
+    </div>
+
+    <!-- Premium Background Glows -->
+    <div class="fixed top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-900/20 rounded-full blur-[120px] pointer-events-none z-0"></div>
+    <div class="fixed bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-teal-900/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
+
+    <!-- Top Navigation / User Status Bar -->
+    <nav class="w-full bg-brand-dark/60 backdrop-blur-md border-b border-slate-800/80 py-3 px-6 fixed top-0 left-0 right-0 z-40 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <span class="w-3 h-3 rounded-full bg-teal-400 animate-pulse"></span>
+            <span class="font-bold text-sm tracking-wide text-slate-200">FNCL GROUP</span>
+        </div>
+        
+        <!-- User Status Controls -->
+        <div id="user-nav-controls" class="flex items-center space-x-3 text-xs">
+            <!-- Logged out view -->
+            <button type="button" id="open-login-btn" class="px-4 py-1.5 bg-teal-500/10 hover:bg-teal-500/20 border border-teal-500/30 text-teal-300 font-semibold rounded-lg transition-colors">
+                Sign In / Register
+            </button>
+            
+            <!-- Logged in view (hidden by default) -->
+            <div id="user-info-bar" class="hidden flex items-center space-x-3">
+                <span class="text-slate-300 flex items-center space-x-1 font-medium bg-slate-800/60 px-3 py-1 rounded-lg border border-slate-700/50">
+                    <span id="user-display-name">Loading...</span>
+                    <span id="user-role-badge" class="ml-2 px-1.5 py-0.5 bg-teal-950 text-teal-300 border border-teal-500/30 text-[10px] rounded uppercase font-bold">User</span>
+                </span>
+                
+                <button type="button" id="admin-panel-btn" class="hidden px-3 py-1.5 bg-purple-950/60 hover:bg-purple-900/70 border border-purple-500/40 text-purple-200 font-semibold rounded-lg transition-colors flex items-center space-x-1">
+                    <span>⚙️ Admin Panel</span>
+                </button>
+                
+                <button type="button" id="logout-btn" class="px-3 py-1.5 bg-red-950/40 hover:bg-red-900/50 border border-red-500/30 text-red-300 font-semibold rounded-lg transition-colors">
+                    Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="container mx-auto px-4 pt-24 pb-8 max-w-5xl flex-grow flex flex-col justify-center relative z-10">
+        
+        <!-- Header -->
+        <header class="text-center mb-10">
+            <h1 id="app-title" class="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-100 to-teal-400 bg-clip-text text-transparent mb-3">
+                FNCL Group Manulife Investment Report Generator
+            </h1>
+            <p class="text-slate-400 text-md md:text-lg max-w-2xl mx-auto">
+                Drop in a customer PDF statement and your target Excel report to instantly parse, calculate, and inject metrics with absolute layout preservation.
+            </p>
+        </header>
+
+        <!-- Glassmorphic Dashboard Card -->
+        <div class="bg-brand-card/60 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 md:p-8 shadow-2xl relative">
+            
+            <!-- FNCL Group Portal Badge -->
+            <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-800/80">
+                <div class="inline-flex items-center space-x-2 bg-teal-950/60 border border-teal-500/30 px-3 py-1 rounded-full text-xs font-bold text-teal-300">
+                    <span class="w-2 h-2 rounded-full bg-teal-400 animate-ping"></span>
+                    <span>FNCL GROUP AUTOMATION SYSTEM</span>
+                </div>
+                <span class="text-xs text-slate-500 font-mono">v2.0 Protected</span>
+            </div>
+            
+            <!-- Side-by-Side Split Screen Drop Zones -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+                
+                <!-- Left Drop Zone (PDF) -->
+                <div class="flex flex-col">
+                    <label class="text-sm font-semibold text-slate-300 mb-2 flex items-center justify-between">
+                        <span>Customer report from Manulife</span>
+                        <span class="text-xs text-red-400 font-normal">PDF Only</span>
+                    </label>
+                    <div id="pdf-dropzone" class="dropzone flex-grow border-2 border-dashed border-slate-600 hover:border-teal-400/80 bg-brand-dark/40 hover:bg-teal-950/10 rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer transition-all duration-300 group min-h-[220px]">
+                        <input type="file" id="pdf-input" accept=".pdf" class="hidden">
+                        
+                        <!-- Default View -->
+                        <div id="pdf-default-view" class="flex flex-col items-center justify-center">
+                            <div class="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center text-red-400 group-hover:scale-110 transition-transform duration-300 mb-4 border border-red-500/20 group-hover:border-red-500/40">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <p class="text-sm font-medium text-slate-300 group-hover:text-teal-400 transition-colors duration-200">Drag & Drop PDF Statement</p>
+                            <p class="text-xs text-slate-500 mt-1">or click to browse local files</p>
+                        </div>
+                        
+                        <!-- Success View -->
+                        <div id="pdf-success-view" class="hidden flex flex-col items-center justify-center text-center">
+                            <div class="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center text-green-400 mb-4 border border-green-500/20">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <p class="text-sm font-semibold text-white truncate max-w-[240px]" id="pdf-file-name"></p>
+                            <p class="text-xs text-slate-400 mt-1" id="pdf-file-size"></p>
+                            <button type="button" id="clear-pdf" class="mt-4 px-3 py-1 bg-red-950/40 hover:bg-red-900/50 border border-red-500/30 rounded-lg text-xs text-red-300 font-semibold transition-colors duration-200">
+                                Remove File
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Drop Zone (Excel) -->
+                <div class="flex flex-col">
+                    <label class="text-sm font-semibold text-slate-300 mb-2 flex items-center justify-between">
+                        <span>My Excel report for customer</span>
+                        <div class="flex items-center space-x-2">
+                            <button type="button" id="download-template-btn" title="Download Blank Template" class="text-[11px] text-green-400 hover:text-green-300 font-semibold bg-green-950/60 border border-green-500/30 px-2.5 py-1 rounded-lg transition-colors flex items-center space-x-1">
+                                <span>📥 Blank Template</span>
+                            </button>
+                            <span class="text-xs text-green-400 font-normal">Excel Only</span>
+                        </div>
+                    </label>
+                    <div id="excel-dropzone" class="dropzone flex-grow border-2 border-dashed border-slate-600 hover:border-green-400/80 bg-brand-dark/40 hover:bg-green-950/10 rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer transition-all duration-300 group min-h-[220px]">
+                        <input type="file" id="excel-input" accept=".xlsx" class="hidden">
+                        
+                        <!-- Default View -->
+                        <div id="excel-default-view" class="flex flex-col items-center justify-center">
+                            <div class="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center text-green-400 group-hover:scale-110 transition-transform duration-300 mb-4 border border-green-500/20 group-hover:border-green-500/40">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </div>
+                            <p class="text-sm font-medium text-slate-300 group-hover:text-green-400 transition-colors duration-200">Drag & Drop Excel Template</p>
+                            <p class="text-xs text-slate-500 mt-1">or click to browse local files</p>
+                        </div>
+                        
+                        <!-- Success View -->
+                        <div id="excel-success-view" class="hidden flex flex-col items-center justify-center text-center">
+                            <div class="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center text-green-400 mb-4 border border-green-500/20">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <p class="text-sm font-semibold text-white truncate max-w-[240px]" id="excel-file-name"></p>
+                            <p class="text-xs text-slate-400 mt-1" id="excel-file-size"></p>
+                            <button type="button" id="clear-excel" class="mt-4 px-3 py-1 bg-red-950/40 hover:bg-red-900/50 border border-red-500/30 rounded-lg text-xs text-red-300 font-semibold transition-colors duration-200">
+                                Remove File
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Action button centered -->
+            <div class="flex flex-col items-center justify-center space-y-4">
+                <button type="button" id="proceed-btn" disabled
+                        class="w-full sm:w-80 py-4 px-6 rounded-xl font-bold text-md tracking-wide shadow-lg transition-all duration-300 transform bg-slate-700 text-slate-400 cursor-not-allowed uppercase hover:-translate-y-[1px]">
+                    Proceed / Start to Generate Report
+                </button>
+                
+                <!-- Feedback / Error messages -->
+                <div id="error-message" class="hidden text-red-400 text-sm font-semibold max-w-md text-center p-3 bg-red-950/20 border border-red-500/20 rounded-xl"></div>
+            </div>
+
+            <!-- Progress & Processing Bar -->
+            <div id="progress-container" class="hidden mt-8 max-w-xl mx-auto">
+                <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden border border-slate-700/50">
+                    <div id="progress-bar" class="bg-gradient-to-r from-blue-500 to-teal-400 h-full rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+                </div>
+                <div class="flex justify-between items-center text-xs font-semibold text-slate-400 mt-2">
+                    <span id="progress-text">Waiting...</span>
+                    <span id="progress-percent">0%</span>
+                </div>
+            </div>
+
+        </div>
+        
+    </main>
+
+    <!-- Footer Container housing Download button at absolute bottom -->
+    <footer class="w-full bg-brand-dark/80 backdrop-blur-md border-t border-slate-800/80 py-6 relative z-10">
+        <div class="container mx-auto px-4 max-w-5xl flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="text-slate-500 text-xs text-center md:text-left">
+                <p>&copy; 2026 FNCL Group Manulife Excel Automation. System Local Deployment.</p>
+                <p class="mt-0.5">Strict formatting preservation & validation rules enforced.</p>
+            </div>
+            
+            <!-- Download Button -->
+            <button type="button" id="download-btn" disabled
+                    class="w-full md:w-64 py-3 px-6 rounded-xl font-bold text-sm tracking-wide shadow-lg transition-all duration-300 transform bg-slate-800 text-slate-500 cursor-not-allowed flex items-center justify-center space-x-2 border border-slate-700/50">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span>Download Completed Report</span>
+            </button>
+        </div>
+    </footer>
+
+
+    <!-- AUTHENTICATION MODAL (Sign In & Register) -->
+    <div id="auth-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-scale-in">
+        <div class="bg-brand-card/95 border border-slate-700/80 rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative">
+            
+            <!-- Modal Header / Tabs -->
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold tracking-tight text-white mb-2">FNCL Group Access Control</h2>
+                <p class="text-xs text-slate-400">Sign in to your account or register for access approval.</p>
+                
+                <div class="flex border-b border-slate-700 mt-6">
+                    <button type="button" id="tab-login" class="flex-1 py-2 text-sm font-semibold text-teal-400 border-b-2 border-teal-400 transition-all">
+                        Sign In
+                    </button>
+                    <button type="button" id="tab-register" class="flex-1 py-2 text-sm font-semibold text-slate-400 border-b-2 border-transparent hover:text-slate-200 transition-all">
+                        Register
+                    </button>
+                </div>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Username or Email</label>
+                    <input type="text" id="login-username" required placeholder="admin or user@fncl.com"
+                           class="w-full bg-brand-dark/80 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-teal-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Password</label>
+                    <input type="password" id="login-password" required placeholder="••••••••••••"
+                           class="w-full bg-brand-dark/80 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-teal-400">
+                </div>
+                
+                <button type="submit" id="login-submit-btn" class="w-full py-3 bg-gradient-to-r from-blue-500 to-teal-400 font-bold text-sm text-white rounded-xl shadow-lg hover:brightness-110 transition-all">
+                    Sign In
+                </button>
+            </form>
+
+            <!-- Register Form (hidden by default) -->
+            <form id="register-form" class="hidden space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Full Name</label>
+                    <input type="text" id="reg-name" required placeholder="John Doe"
+                           class="w-full bg-brand-dark/80 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-teal-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Username</label>
+                    <input type="text" id="reg-username" required placeholder="johndoe"
+                           class="w-full bg-brand-dark/80 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-teal-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Email Address</label>
+                    <input type="email" id="reg-email" required placeholder="john@company.com"
+                           class="w-full bg-brand-dark/80 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-teal-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Password</label>
+                    <input type="password" id="reg-password" required placeholder="••••••••••••"
+                           class="w-full bg-brand-dark/80 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-teal-400">
+                </div>
+                
+                <button type="submit" id="register-submit-btn" class="w-full py-3 bg-gradient-to-r from-purple-500 to-teal-400 font-bold text-sm text-white rounded-xl shadow-lg hover:brightness-110 transition-all">
+                    Create Account
+                </button>
+            </form>
+
+            <!-- Auth Status / Error Message Box -->
+            <div id="auth-status-msg" class="hidden mt-4 text-xs font-semibold text-center p-3 rounded-xl"></div>
+        </div>
+    </div>
+
+
+    <!-- ADMIN MANAGEMENT PANEL MODAL -->
+    <div id="admin-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-scale-in">
+        <div class="bg-brand-card/95 border border-purple-500/30 rounded-2xl p-6 sm:p-8 max-w-4xl w-full shadow-2xl relative max-h-[90vh] flex flex-col">
+            
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between pb-4 border-b border-slate-700 mb-6">
+                <div>
+                    <h2 class="text-xl font-bold tracking-tight text-white flex items-center space-x-2">
+                        <span>⚙️ FNCL Group Access Control Management</span>
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Manage registered users, approve sign-ups, and pull back / restore user access instantly.</p>
+                </div>
+                <button type="button" id="close-admin-btn" class="text-slate-400 hover:text-white p-2 text-xl font-bold">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Scrollable Content Area -->
+            <div class="overflow-y-auto flex-grow space-y-6 pr-1">
+                
+                <!-- Create User Quick Form for Admin -->
+                <div class="bg-brand-dark/50 border border-slate-700/60 rounded-xl p-4">
+                    <h3 class="text-sm font-semibold text-teal-300 mb-3 flex items-center space-x-2">
+                        <span>+ Add New User Directly</span>
+                    </h3>
+                    <form id="admin-create-form" class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                        <input type="text" id="admin-add-name" required placeholder="Full Name" class="bg-brand-dark border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                        <input type="text" id="admin-add-username" required placeholder="Username" class="bg-brand-dark border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                        <input type="email" id="admin-add-email" required placeholder="Email" class="bg-brand-dark border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                        <input type="password" id="admin-add-password" required placeholder="Password" class="bg-brand-dark border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                        
+                        <div class="sm:col-span-4 flex justify-end">
+                            <button type="submit" class="px-4 py-2 bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs rounded-lg transition-colors">
+                                Add & Activate User
+                            </button>
+                        </div>
+                    </form>
+                <!-- Change Admin Credentials Form -->
+                <div class="bg-brand-dark/50 border border-purple-500/40 rounded-xl p-4">
+                    <h3 class="text-sm font-semibold text-purple-300 mb-3 flex items-center space-x-2">
+                        <span>🔒 Change My Username / Password</span>
+                    </h3>
+                    <form id="change-credentials-form" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <input type="text" id="change-new-username" placeholder="New Username (Optional)" class="bg-brand-dark border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                        <input type="password" id="change-new-password" placeholder="New Password (Optional)" class="bg-brand-dark border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                        <input type="password" id="change-curr-password" required placeholder="Current Password (Required)" class="bg-brand-dark border border-purple-500/60 rounded-lg px-3 py-2 text-xs text-white">
+                        
+                        <div class="sm:col-span-3 flex items-center justify-between">
+                            <span id="change-cred-status" class="text-xs font-semibold hidden"></span>
+                            <button type="submit" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-lg transition-colors ml-auto">
+                                Save Credentials
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- User Management Table -->
+                <div class="border border-slate-700/60 rounded-xl overflow-hidden">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead class="bg-slate-800/80 text-slate-400 font-semibold border-b border-slate-700 uppercase tracking-wider text-[11px]">
+                            <tr>
+                                <th class="p-3">User</th>
+                                <th class="p-3">Username / Email</th>
+                                <th class="p-3">Role</th>
+                                <th class="p-3">Status</th>
+                                <th class="p-3 text-right">Access Control Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-user-table-body" class="divide-y divide-slate-800">
+                            <!-- Populated dynamically by app.js -->
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- App Script -->
+    <script src="app.js?v=2.0"></script>
+</body>
+</html>

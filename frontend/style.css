@@ -1,0 +1,103 @@
+/* Custom CSS for Manulife Report Generator */
+
+/* Backdrop Glassmorphism styling */
+.backdrop-blur-xl {
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+}
+
+/* Base Body Styles */
+body {
+    background-color: #080C14;
+    background-image: 
+        radial-gradient(at 10% 20%, rgba(59, 130, 246, 0.05) 0px, transparent 50%),
+        radial-gradient(at 90% 80%, rgba(0, 209, 255, 0.03) 0px, transparent 50%);
+    background-attachment: fixed;
+}
+
+/* Dropzone drag-over active state */
+.dropzone.dragover {
+    border-color: #00D1FF !important;
+    background-color: rgba(0, 209, 255, 0.05) !important;
+    box-shadow: 0 0 20px rgba(0, 209, 255, 0.15) !important;
+    transform: scale(1.01);
+}
+
+/* PDF & Excel success status dropzones (Green Accent Outline) */
+.dropzone.pdf-loaded,
+.dropzone.excel-loaded {
+    border-color: #10B981 !important;
+    background-color: rgba(16, 185, 129, 0.04) !important;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.1) !important;
+}
+
+@keyframes scaleIn {
+    0% {
+        transform: scale(0.97);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.animate-scale-in {
+    animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Smooth active button transition class */
+.btn-active-teal {
+    background: linear-gradient(135deg, #3B82F6 0%, #00D1FF 100%) !important;
+    color: #FFFFFF !important;
+    cursor: pointer !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 209, 255, 0.4) !important;
+}
+
+.btn-active-teal:hover {
+    box-shadow: 0 15px 30px -5px rgba(0, 209, 255, 0.5) !important;
+    filter: brightness(1.05);
+}
+
+.btn-active-teal:active {
+    transform: scale(0.98);
+}
+
+.btn-active-green {
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
+    color: #FFFFFF !important;
+    cursor: pointer !important;
+    box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4) !important;
+}
+
+.btn-active-green:hover {
+    box-shadow: 0 15px 30px -5px rgba(16, 185, 129, 0.5) !important;
+    filter: brightness(1.05);
+}
+
+.btn-active-green:active {
+    transform: scale(0.98);
+}
+
+/* Animation transitions */
+.transition-all {
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #0B0F19;
+}
+::-webkit-scrollbar-thumb {
+    background: #1E293B;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #334155;
+}
