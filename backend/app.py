@@ -363,8 +363,20 @@ async def process_reports(
             content={"detail": str(e)}
         )
 
-# Serve Frontend Static Files
-frontend_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
-os.makedirs(frontend_dir, exist_ok=True)
+# Serve Frontend Static Files with multi-path resolution
+possible_paths = [
+    os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend"),
+    os.path.join(os.path.dirname(__file__)), "frontend"),
+    os.path.join(os.getcwd(), "frontend")
+]
+frontend_dir = None
+for p in possible_paths:
+    if os.path.exists(p) and os.path.isdir(p):
+        frontend_dir = p
+        break
+
+if not frontend_dir:
+    frontend_dir = possible_paths[0]
+    os.makedirs(frontend_dir, exist_ok=True)
 
 app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="static")
