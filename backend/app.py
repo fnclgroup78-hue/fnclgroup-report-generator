@@ -6,9 +6,16 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from pydantic import BaseModel
 from typing import Optional
 import os
+import sys
 import shutil
 import uuid
 import traceback
+
+# Ensure backend directory is in sys.path for root module imports
+backend_dir = os.path.dirname(__file__)
+if backend_dir not in sys.path:
+    sys.path.insert(0, backend_dir)
+
 from parser import parse_pdf
 from excel_writer import update_excel_report
 import auth
@@ -302,7 +309,6 @@ async def process_reports(
     pdf_file: UploadFile = File(...),
     excel_file: UploadFile = File(...)
 ):
-    # Verify Authentication & Active Status
     current_user = get_current_user(request)
     print(f"Processing report request for authenticated user: {current_user['username']} ({current_user['role']})")
 
