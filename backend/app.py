@@ -366,7 +366,7 @@ async def process_reports(
 # Serve Frontend Static Files with multi-path resolution
 possible_paths = [
     os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend"),
-    os.path.join(os.path.dirname(__file__)), "frontend"),
+    os.path.join(os.path.dirname(__file__), "frontend"),
     os.path.join(os.getcwd(), "frontend")
 ]
 frontend_dir = None
