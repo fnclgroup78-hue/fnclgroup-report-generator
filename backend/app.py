@@ -380,3 +380,9 @@ if not frontend_dir:
     os.makedirs(frontend_dir, exist_ok=True)
 
 app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="static")
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 10000))
+    print(f"Launching FNCL Group server on port {port}...")
+    uvicorn.run(app, host="0.0.0.0", port=port)
